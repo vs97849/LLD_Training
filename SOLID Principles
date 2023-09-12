@@ -5,7 +5,7 @@ I - Interface Segregation
 D - Dependency Inversion
 
 Single Responsibility :
-    Do not try to overload class with different purpose. Put similiar actions/members inside single class.
+    Do not try to overload class with different purpose. Put similar actions/members inside single class.
 
 Open-Closed :
     Open for extension and closed for modification. design in such a way that, in case of new requirements comes, code changes
