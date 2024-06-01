@@ -1,0 +1,22 @@
+class Singleton
+{
+  private:
+      static Singleton *instance;
+      static std::mutex mutex_;
+      
+      Singleton()  {  };
+      Singleton( const Singleton & other ) = delete;
+      Singleton & operator = ( const Singleton & ) = delete;
+      static Singleton * GetInstance( );
+};
+  
+  Singleton * Singleton::instance { nullptr };
+  std::mutex Singleton::mutex_;
+  
+Singleton * Singleton::GetInstance( const std::string & value ) 
+{
+      std::lock_guard<std::mutex> lock( mutex_ );
+      if ( ! instance )
+          instance = new Singleton( );
+      return instance;
+}
