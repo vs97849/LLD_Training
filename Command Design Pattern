@@ -1,0 +1,62 @@
+/*
+The Command Pattern is a behavioral design pattern that focuses on encapsulating a request as an object, thereby decoupling the sender of the request from the receiver. 
+This pattern allows you to parameterize objects with commands, delay or queue a request’s execution, and support undoable operations. 
+It’s a fundamental pattern for implementing a wide range of functionality in software systems.
+*/
+
+#include <iostream>
+#include <vector>
+
+class Command {
+public:
+    virtual void execute() = 0;
+};
+
+class Receiver {
+public:
+    void action() {
+        std::cout << "Receiver action" << std::endl;
+    }
+};
+
+class ConcreteCommand : public Command {
+private:
+    Receiver* receiver;
+
+public:
+    ConcreteCommand(Receiver* receiver) : receiver(receiver) {}
+    
+    void execute() override {
+        receiver->action();
+    }
+};
+
+class Invoker {
+private:
+    std::vector<Command*> commands;
+
+public:
+    void addCommand(Command* command) {
+        commands.push_back(command);
+    }
+    
+    void executeCommands() {
+        for (auto* command : commands) {
+            command->execute();
+        }
+    }
+};
+
+int main() {
+    Receiver* receiver = new Receiver();
+    Command* command = new ConcreteCommand(receiver);
+    Invoker* invoker = new Invoker();
+    
+    invoker->addCommand(command);
+    invoker->executeCommands();
+    
+    delete invoker;
+    delete command;
+    delete receiver;
+    return 0;
+}
