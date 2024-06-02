@@ -3,142 +3,71 @@ the actual implementation to be used at runtime.
 Strategy pattern is also known as policy pattern. We define multiple algorithms and let client pass the algorithm as parameter. 
 For exp: std::sort(ds.begin(), ds.end(), comparator). So here based on different comparator, objects are sorted accordingly.
 
- For our example, we will try to implement a simple Shopping Cart where we have two payment strategies - using Credit Card or using PayPal. First of all we will create the interface for our strategy pattern example, in our case to pay the amount passed as argument. PaymentStrategy.java
+#include <iostream>
+#include <vector>
 
-package com.journaldev.design.strategy;
+// Observer interface
+class Observer {
+public:
+	virtual void update(float temperature, float humidity, float pressure) = 0;
+};
 
-public interface PaymentStrategy {
+// Subject (WeatherStation) class
+class WeatherStation {
+private:
+	float temperature;
+	float humidity;
+	float pressure;
+	std::vector<Observer*> observers;
 
-	public void pay(int amount);
-}
-Now we will have to create concrete implementation of algorithms for payment using credit/debit card or through paypal. CreditCardStrategy.java
-
-package com.journaldev.design.strategy;
-
-public class CreditCardStrategy implements PaymentStrategy {
-
-	private String name;
-	private String cardNumber;
-	private String cvv;
-	private String dateOfExpiry;
-	
-	public CreditCardStrategy(String nm, String ccNum, String cvv, String expiryDate){
-		this.name=nm;
-		this.cardNumber=ccNum;
-		this.cvv=cvv;
-		this.dateOfExpiry=expiryDate;
-	}
-	@Override
-	public void pay(int amount) {
-		System.out.println(amount +" paid with credit/debit card");
+public:
+	void registerObserver(Observer* observer) {
+		observers.push_back(observer);
 	}
 
-}
-PaypalStrategy.java
-
-package com.journaldev.design.strategy;
-
-public class PaypalStrategy implements PaymentStrategy {
-
-	private String emailId;
-	private String password;
-	
-	public PaypalStrategy(String email, String pwd){
-		this.emailId=email;
-		this.password=pwd;
-	}
-	
-	@Override
-	public void pay(int amount) {
-		System.out.println(amount + " paid using Paypal.");
+	void removeObserver(Observer* observer) {
+		// You can implement the removal logic if needed.
 	}
 
-}
-Now our strategy pattern example algorithms are ready. We can implement Shopping Cart and payment method will require input as Payment strategy. Item.java
-
-package com.journaldev.design.strategy;
-
-public class Item {
-
-	private String upcCode;
-	private int price;
-	
-	public Item(String upc, int cost){
-		this.upcCode=upc;
-		this.price=cost;
-	}
-
-	public String getUpcCode() {
-		return upcCode;
-	}
-
-	public int getPrice() {
-		return price;
-	}
-	
-}
-ShoppingCart.java
-
-package com.journaldev.design.strategy;
-
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
-
-public class ShoppingCart {
-
-	//List of items
-	List<Item> items;
-	
-	public ShoppingCart(){
-		this.items=new ArrayList<Item>();
-	}
-	
-	public void addItem(Item item){
-		this.items.add(item);
-	}
-	
-	public void removeItem(Item item){
-		this.items.remove(item);
-	}
-	
-	public int calculateTotal(){
-		int sum = 0;
-		for(Item item : items){
-			sum += item.getPrice();
+	void notifyObservers() {
+		for (Observer* observer : observers) {
+			observer->update(temperature, humidity, pressure);
 		}
-		return sum;
 	}
-	
-	public void pay(PaymentStrategy paymentMethod){
-		int amount = calculateTotal();
-		paymentMethod.pay(amount);
+
+	void setMeasurements(float temp, float hum, float press) {
+		temperature = temp;
+		humidity = hum;
+		pressure = press;
+		notifyObservers();
 	}
+};
+
+// Concrete Observer
+class Display : public Observer {
+public:
+	void update(float temperature, float humidity, float pressure) {
+		std::cout << "Display: Temperature = " << temperature
+				<< "°C, Humidity = " << humidity
+				<< "%, Pressure = " << pressure << " hPa"
+				<< std::endl;
+	}
+};
+
+int main() {
+	WeatherStation weatherStation;
+
+	// Create displays
+	Display display1;
+	Display display2;
+
+	// Register displays as observers
+	weatherStation.registerObserver(&display1);
+	weatherStation.registerObserver(&display2);
+
+	// Simulate weather data updates
+	weatherStation.setMeasurements(25.5, 60, 1013.2);
+	weatherStation.setMeasurements(24.8, 58, 1014.5);
+
+	return 0;
 }
-Notice that payment method of shopping cart requires payment algorithm as argument and doesn’t store it anywhere as instance variable. Let’s test our strategy pattern example setup with a simple program. ShoppingCartTest.java
-
-package com.journaldev.design.strategy;
-
-public class ShoppingCartTest {
-
-	public static void main(String[] args) {
-		ShoppingCart cart = new ShoppingCart();
-		
-		Item item1 = new Item("1234",10);
-		Item item2 = new Item("5678",40);
-		
-		cart.addItem(item1);
-		cart.addItem(item2);
-		
-		//pay by paypal
-		cart.pay(new PaypalStrategy("myemail@example.com", "mypwd"));
-		
-		//pay by credit card
-		cart.pay(new CreditCardStrategy("Pankaj Kumar", "1234567890123456", "786", "12/15"));
-	}
-
-}
-Output of above program is:
-
-50 paid using Paypal.
-50 paid with credit/debit card
